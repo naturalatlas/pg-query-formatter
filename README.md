@@ -42,8 +42,8 @@ var all = new Query('%Q UNION ALL %Q', teachers, students);
 
 //Query Lists
 var where = new Query.List(' AND '); // make a list of queries separated by ' AND '
-where.append("age > %I", 20)
-where.append("age < %I", 30)
+where.append("age > %L", 20)
+where.append("age < %L", 30)
 var sql = new Query('SELECT %I FROM teachers WHERE %Q', ['id', 'name'], where);
 
 //Update
