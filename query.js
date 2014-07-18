@@ -6,10 +6,15 @@ var _        = require('lodash');
  *
  * Format tags
  * 
- * %s - string
- * %I - Identifier
- * %L - Literal
- * %Q - Subquery
+ * %s     - string
+ * %I     - Identifier
+ * %L     - Literal
+ * %Q     - Subquery
+ * %(fmt) - Object 
+ *             + %($I = $L) *assignment lists*
+ *             + %($I $I)   *column definitions*
+ * $A - Object (as '$I = $L)
+ * $C - Object (as '$I $I')
  *
  * Any value that is passed as an array will automatically get expanded. (joined by commas)
  * ex.
@@ -62,11 +67,19 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 	var i = 0;
 	var values = [];
 
-	var text = this.fmt.replace(/%([%sILQ])/g, function(match, type){
+	var text = this.fmt.replace(/%([%sILQ])|%\((.*)\)/g, function(match, type, obj_fmt){
 		if ('%' == type) return '%';
 
 		var value = self.values[i++];
 		if (value instanceof Array){
+			if (obj_fmt) {
+				var formatter = new ObjectFormatter(obj_fmt);
+				value.forEach(function(value){
+					formatter.append(value);
+				});
+				type  = 'Q';
+				value = formatter;
+			}
 			switch (type) {
 				case 's':
 					return _.map(value, pgescape.string).join(', ');
@@ -86,6 +99,12 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 					}).join(', ');
 			}
 		} else {
+			if (obj_fmt) {
+				var formatter = new ObjectFormatter(obj_fmt);
+				formatter.append(value);
+				type  = 'Q';
+				value = formatter;
+			}
 			switch (type) {
 				case 's':
 					return pgescape.string(value);
@@ -155,17 +174,17 @@ List.prototype.append = function(fmt, values){
 	this.values = this.values.concat(values);
 }
 
-var AssignmentList = Query.AssignmentList = function(obj){
+var ObjectFormatter = Query.ObjectFormatter = function(obj_interpretation, obj){
 	List.call(this, ', ');
+	this.obj_interpretation = obj_interpretation;
 	if(obj) this.append(obj);
 }
 
-_.extend(AssignmentList.prototype, List.prototype);
+_.extend(ObjectFormatter.prototype, List.prototype);
 
-AssignmentList.prototype.append = function(obj) {
+ObjectFormatter.prototype.append = function(obj) {
 	var self = this;
 	_.each(obj, function(value, key){
-		List.prototype.append.call(self, '%I = %L', key, value);
+		List.prototype.append.call(self, self.obj_interpretation, key, value);
 	});
-	this.values
-};
+};  

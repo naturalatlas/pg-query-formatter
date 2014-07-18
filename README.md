@@ -21,7 +21,10 @@ sql.toParam();
 - **%s** : String (unescaped)
 - **%I** : Identifier
 - **%L** : Literal (string or number)
-- **%Q** : Subquery
+- **%Q** : Subquery 
+- **%(fmt)** : Object 
+	+ %($I = $L) : assignment lists `{id: 5, name: 'george'}`
+	+ %($I $I)   : column definitions `{id: 'integer', name: 'text'}`
 
 ### Examples
 
@@ -44,6 +47,5 @@ where.append("age < %I", 30)
 var sql = new Query('SELECT %I FROM teachers WHERE %Q', ['id', 'name'], where);
 
 //Update
-var values = new Query.AssignmentList({name: 'George', age: 25});
-var sql = new Query('UPDATE TABLE people SET %Q WHERE id = %L', values, 4); 
+var sql = new Query('UPDATE TABLE people SET %(%I = %L) WHERE id = %L', {name: 'George', age: 25}, 4); 
 ```
