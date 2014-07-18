@@ -24,7 +24,7 @@ sql.toParam();
 - **%Q** : Subquery 
 - **%(fmt)** : Object 
 	+ **%($I = $L)** : assignment lists `{id: 5, name: 'george'}`
-	+ **%($I $I)**   : column definitions `{id: 'integer', name: 'text'}`
+	+ **%($s $s)**   : column definitions `{id: 'integer', name: 'text'}`
 
 ### Examples
 
