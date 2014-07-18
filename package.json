@@ -1,0 +1,33 @@
+{
+  "name": "pg-query-formatter",
+  "version": "0.0.1",
+  "description": "Lightweight query string formatter for node",
+  "url": "http://github.com/naturalatlas/pg-query-formatter",
+  "main": "./lib/query.js",
+  "keywords": [
+    "pg",
+    "db",
+    "database",
+    "query",
+    "postgres"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/naturalatlas/pg-query-formatter.git"
+  },
+  "author": {
+    "name": "Brandon Reavis",
+    "url": "https://github.com/brandonreavis",
+    "email": "brandon@naturalatlas.com"
+  },
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "pg-escape": "~0.0.3",
+    "lodash": "*"
+  }
+}
