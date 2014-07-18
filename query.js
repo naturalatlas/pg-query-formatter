@@ -26,6 +26,7 @@ var _        = require('lodash');
  * @param  {string}  fmt       
  * @param  {*}       values...
  */
+
 var Query = module.exports = function(fmt, values){
 	this.fmt = fmt;
 	this.values = Array.prototype.slice.call(arguments, 1);
@@ -128,9 +129,9 @@ Query.prototype.toString = function(){
  *
  * ex.
  * var where = new Query.List(' AND ');
- * where.add('age > %L', 20);
- * where.add('age < %L', 30);
- * where.add('name IN (%L)', ['George', 'Jorge', 'Georgio']);
+ * where.append('age > %L', 20);
+ * where.append('age < %L', 30);
+ * where.append('name IN (%L)', ['George', 'Jorge', 'Georgio']);
  *
  * var select = new Query('SELECT * FROM people WHERE %Q', where);
  *
@@ -140,26 +141,31 @@ Query.prototype.toString = function(){
 var List = Query.List = function(separator){
 	this.separator = separator || ', ';
 	this.values    = [];
-	this.fmts      = [];
+	this.fmt       = '';
 }
 
-List.prototype.add = function(fmt, values){
+_.extend(List.prototype, Query.prototype)
+
+List.prototype.append = function(fmt, values){
 	var self = this;
 
 	var values = Array.prototype.slice.call(arguments, 1);
 
-	self.fmts.push(fmt);
-	values.forEach(function(value){
-		self.values.push(value);
+	this.fmt   += this.fmt ? this.separator + fmt : fmt;
+	this.values = this.values.concat(values);
+}
+
+var AssignmentList = Query.AssignmentList = function(obj){
+	List.call(this, ', ');
+	if(obj) this.append(obj);
+}
+
+_.extend(AssignmentList.prototype, List.prototype);
+
+AssignmentList.prototype.append = function(obj) {
+	var self = this;
+	_.each(obj, function(value, key){
+		List.prototype.append.call(self, '%I = %L', key, value);
 	});
-}
-
-List.prototype.toParam = function(use_numbered_params, start_index){
-	var q = {
-		fmt:    this.fmts.join(this.separator),
-		values: this.values
-	};
-	return Query.prototype.toParam.call(q, use_numbered_params,start_index);
-}
-
-List.prototype.toString = Query.prototype.toString;
+	this.values
+};
