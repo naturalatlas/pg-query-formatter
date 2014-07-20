@@ -37,6 +37,19 @@ var Query = module.exports = function(fmt, values){
 	this.values = Array.prototype.slice.call(arguments, 1);
 };
 
+Query.literal = function(values) {
+	return new Query('%L', values);
+};
+Query.ident = function(values) {
+	return new Query('%I', values);
+};
+Query.subquery = function(values) {
+	return new Query('%Q', values);
+}
+Query.string = function(values) {
+	return new Query('%s', values);
+}
+
 Query.prototype.append = function(fmt, values){
 	var values = Array.prototype.slice.call(arguments, 1);
 
@@ -87,6 +100,9 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 					return _.map(value, pgescape.ident).join(', ');
 				case 'L': 
 					return _.map(value, function(value){
+						if(value === null || value === undefined){
+							return 'NULL';
+						}
 						values.push(value);
 						return use_numbered_params ? '$'+(numbering_index++) : '?';
 					}).join(', ');
@@ -111,6 +127,9 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 				case 'I': 
 					return pgescape.ident(value);
 				case 'L': 
+					if(value === null || value === undefined){
+						return 'NULL';
+					}
 					values.push(value);
 					return use_numbered_params ? '$'+(numbering_index++) : '?';
 				case 'Q': 
