@@ -16,7 +16,7 @@ sql.toParam();
 // { text: 'SELECT * FROM teachers WHERE name = $1', values: [ 'george' ] }
 ```
 
-### Format Specifiers
+#### Format Specifiers
 
 - **`%s`** – String (unescaped)
 - **`%I`** – Identifier
