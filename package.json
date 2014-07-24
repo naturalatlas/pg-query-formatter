@@ -27,7 +27,6 @@
     }
   ],
   "dependencies": {
-    "pg-escape": "~0.0.3",
-    "lodash": "*"
+    "pg-escape": "~0.0.3"
   }
 }

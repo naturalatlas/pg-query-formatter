@@ -1,5 +1,4 @@
 var pgescape = require('pg-escape');
-var _        = require('lodash');
 
 /**
  * Creates a query object from a format string and a list of values
@@ -95,11 +94,11 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 			}
 			switch (type) {
 				case 's':
-					return _.map(value, pgescape.string).join(', ');
+					return value.map(pgescape.string).join(', ');
 				case 'I': 
-					return _.map(value, pgescape.ident).join(', ');
+					return value.map(pgescape.ident).join(', ');
 				case 'L': 
-					return _.map(value, function(value){
+					return value.map(function(value){
 						if(value === null || value === undefined){
 							return 'NULL';
 						}
@@ -107,7 +106,7 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 						return use_numbered_params ? '$'+(numbering_index++) : '?';
 					}).join(', ');
 				case 'Q': 
-					return _.map(value, function(value){
+					return value.map(function(value){
 						if(typeof value === 'string') return pgescape.string(value);
 						var subquery    =  value.toParam(use_numbered_params, numbering_index);
 						values          =  values.concat(subquery.values);
@@ -184,8 +183,8 @@ var List = Query.List = function(separator){
 	this.fmt       = '';
 }
 
-_.extend(List.prototype, Query.prototype)
-
+List.prototype.toString = Query.prototype.toString;
+List.prototype.toParam = Query.prototype.toParam;
 List.prototype.append = function(fmt, values){
 	var self = this;
 
@@ -201,11 +200,14 @@ var ObjectFormatter = Query.ObjectFormatter = function(obj_interpretation, obj){
 	if(obj) this.append(obj);
 }
 
-_.extend(ObjectFormatter.prototype, List.prototype);
-
+ObjectFormatter.prototype.toString = Query.prototype.toString;
+ObjectFormatter.prototype.toParam = Query.prototype.toParam;
 ObjectFormatter.prototype.append = function(obj) {
 	var self = this;
-	_.each(obj, function(value, key){
+	var keys = Object.keys(obj);
+	for(var i = 0, l = keys.length; i < l; i++ ) {
+		var key   = keys[i];
+		var value = obj[key];
 		List.prototype.append.call(self, self.obj_interpretation, key, value);
-	});
+	}
 };  
