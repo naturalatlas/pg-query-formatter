@@ -33,7 +33,7 @@ var _        = require('lodash');
  */
 
 var Query = module.exports = function(fmt, values){
-	this.fmt = fmt;
+	this.fmt = fmt || '';
 	this.values = Array.prototype.slice.call(arguments, 1);
 };
 
@@ -108,6 +108,7 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 					}).join(', ');
 				case 'Q': 
 					return _.map(value, function(value){
+						if(typeof value === 'string') return pgescape.string(value);
 						var subquery    =  value.toParam(use_numbered_params, numbering_index);
 						values          =  values.concat(subquery.values);
 						numbering_index += subquery.values.length;
@@ -133,6 +134,7 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 					values.push(value);
 					return use_numbered_params ? '$'+(numbering_index++) : '?';
 				case 'Q': 
+					if(typeof value === 'string') return pgescape.string(value);
 					var subquery    =  value.toParam(use_numbered_params, numbering_index);
 					values          =  values.concat(subquery.values);
 					numbering_index += subquery.values.length;
