@@ -31,6 +31,6 @@ console.log('4. '+sql.toString());
 
 
 // 5. Update
-var sql = new Query('UPDATE TABLE people SET %(%I = %L) WHERE id = %L', {name: 'George', age: 25, pet_id: null}, 4); 
+var sql = new Query('UPDATE people SET %(%I = %L) WHERE id = %L', {name: 'George', age: 25, pet_id: null}, 4); 
 console.log('5. '+sql.toString());
-//>> UPDATE TABLE people SET name = 'George', age = 25, pet_id = NULL WHERE id = 4
+//>> UPDATE people SET name = 'George', age = 25, pet_id = NULL WHERE id = 4
