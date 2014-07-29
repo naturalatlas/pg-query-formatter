@@ -1,9 +1,9 @@
 {
   "name": "pg-query-formatter",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Lightweight query string formatter for node",
   "url": "http://github.com/naturalatlas/pg-query-formatter",
-  "main": "./lib/query.js",
+  "main": "./query.js",
   "keywords": [
     "pg",
     "db",

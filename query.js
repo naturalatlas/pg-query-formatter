@@ -1,5 +1,16 @@
 var pgescape = require('pg-escape');
 
+var escapeIdent = function(ident){
+	var i = ident.indexOf('.');
+	if (i > -1) {
+		return pgescape.ident(ident.substring(0, i)) + "." + pgescape.ident(ident.substring(i+1));
+	} else {
+		return pgescape.ident(ident);
+	}
+}
+var escapeLiteral = pgescape.literal;
+var escapeString  = pgescape.string;
+
 /**
  * Creates a query object from a format string and a list of values
  *
@@ -79,7 +90,7 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 	var i = 0;
 	var values = [];
 
-	var text = this.fmt.replace(/%([%sILQ])|%\((.*)\)/g, function(match, type, obj_fmt){
+	var text = this.fmt.replace(/%([%sILQ])|%\(([^\)]*)\)/g, function(match, type, obj_fmt){
 		if ('%' == type) return '%';
 
 		var value = self.values[i++];
@@ -94,9 +105,9 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 			}
 			switch (type) {
 				case 's':
-					return value.map(pgescape.string).join(', ');
+					return value.map(escapeString).join(', ');
 				case 'I': 
-					return value.map(pgescape.ident).join(', ');
+					return value.map(escapeIdent).join(', ');
 				case 'L': 
 					return value.map(function(value){
 						if(value === null || value === undefined){
@@ -123,9 +134,9 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 			}
 			switch (type) {
 				case 's':
-					return pgescape.string(value);
+					return escapeString(value);
 				case 'I': 
-					return pgescape.ident(value);
+					return escapeIdent(value);
 				case 'L': 
 					if(value === null || value === undefined){
 						return 'NULL';
@@ -133,7 +144,7 @@ Query.prototype.toParam = function(use_numbered_params, start_index){
 					values.push(value);
 					return use_numbered_params ? '$'+(numbering_index++) : '?';
 				case 'Q': 
-					if(typeof value === 'string') return pgescape.string(value);
+					if(typeof value === 'string') return escapeString(value);
 					var subquery    =  value.toParam(use_numbered_params, numbering_index);
 					values          =  values.concat(subquery.values);
 					numbering_index += subquery.values.length;
@@ -155,7 +166,7 @@ Query.prototype.toString = function(){
 		var value = q.values[i++];
 		var str = value.toString();
 		if(typeof value === 'string'){
-			str = pgescape.literal(str);
+			str = escapeLiteral(str);
 		}
 		return str;
 	});
